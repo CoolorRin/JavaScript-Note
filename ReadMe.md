@@ -3,9 +3,66 @@ This Project is **For check the weak point in the JavaScript learning way.** Inc
 Also provide some syntax sugar or some problem solution for this Language.  
 **Keep it in mind And enjoy it.**
 
-## Expressions
+## Type and the variable
 
-### 
+### Symbol
+> `Symbol` is a bulit-in object whose constructor return a `symbol` primitive, also calle a **Symbol** value or juset a **Symbol** , that's guaranteed to be unique. Symbols are often used to add unique property keys to an object that won't collide with keys any other code might add to the object, and which are hidden from any mechanisms other code will typically use to access the object. That enables a form of weak encapsulation, or a weak form of information hiding.  
+
+**Check the code below, it will show why we need the `Symbol` to declare a Object's property.**
+> [Stack Overflow: Why are JavaScript Symbol references safe from collisions](https://stackoverflow.com/questions/65877355/why-are-javascript-symbol-references-safe-from-collisions)
+```JavaScript
+// Some method you are relying on, perhaps built by a 3rd party
+const program = () => {
+    // Create a symbol to use as an identifier:
+    const primaryFunction = Symbol("primary");
+  
+    // This `obj` will be returned to the 'user' of the program below.
+    const obj = {
+      // This is harder (though not impossible) to access and
+      // override from outside
+      [primaryFunction]: (str) => {
+        console.log("Run symbol function", str);
+      },
+      // This is relatively easy to access and
+      // override from outside
+      primaryFunction: (str) => {
+        console.log("Run non-symbol function", str);
+      }
+    };
+    
+    // Examples of the two functions running as intended:
+    obj[primaryFunction]("... first");
+    obj.primaryFunction("... first");
+  
+    return obj;
+  };
+   
+  // Now as a 'user' implementing `program` - get a copy of `obj` 
+  const myCodeUsingProgram = program();
+  
+  // If I want to access the plain text key, this is trivial.
+  // If I weren't paying attention, I could easily override it
+  myCodeUsingProgram.primaryFunction = () => console.log("Easy to collide and break...");
+  
+  // Now, if I want to access Symbol key, I have to do something like this.
+  // I have my own reference to the Symbol now...but I had to do some work to get it.
+  // I couldn't do something like myCodeUsingProgram[Symbol("primary")]
+  const newReference = Object.getOwnPropertySymbols(myCodeUsingProgram)[0];
+  myCodeUsingProgram[newReference] = () => console.log("Harder to collide and break...");
+  
+  // Run the now 'broken' methods:
+  myCodeUsingProgram.primaryFunction("... second");
+  myCodeUsingProgram[newReference]("...second");
+
+
+function eq(value, other) {
+    return value === other || (value !== value && other !== other);
+}
+console.log(eq(1, "1"))
+```
+
+
+## Expressions and operator
 
 ### eval()
 > eval function is more like a javascript evaluates expression, it expected **A String representing a JavaScript expression, statement, or sequence of statements. The expression can include variables and properties of existing objects.** For safe and cause the unexpcted problem, use the **HTTP Content-Sercurity-Policy** to disable the eval().
@@ -33,6 +90,39 @@ console.log(eval("var x = 7; x")); // prints 7
 console.log(eval("y"));            // prints 3
 console.log(x);                    // prints 2
 ``` 
+## Statement
+
+### Nulllish colaescing operator (??)
+> The **nuillish cloadescing operator`??`** is a logical operator that returns its right-hands side operand when its left-hand side operand is `null` or `undefined`. and otherwise returns its left-hand side operand.
+```JavaScript
+const foo = null ?? "defult string"
+console.log(foo);
+// Expected output: "default string"
+
+const baz = 0 ?? 42;
+console.log(baz);
+// Expected ouput: 0
+
+```
+
+### Logical Nullish assignment(??=)
+> The logical  nullish assignment (`x ??= y`) operator only assigns if `x` is nullish (`null` or `undefined`).
+
+```JavaScript
+const a = { duration: 50 };
+
+a.duration ??= 10;
+console.log(a.duration);
+// Expected output: 50;
+
+a.speed ??= 25;
+console.log(a.speed);
+// Expected ouput: 25
+```
+## Object 
+
+## Property
+
 
 ## Property access error
 
@@ -54,11 +144,9 @@ console.log(obj && obj.propertyA && obj.propertyA.propertyB)
 console.log(obj?.propertyA?.propertyB)
 ```
 
-## ProtoTypeChain
+### ProtoType Chain
 
 > **Note: **Although the ES2015 have provide the `class` to make a `OOP` like Feature, but it just a syntactical sugar base on JavaScript **ProtoType Chain**.
-
-### Constructor Function
 
 ### Inheritance
 
@@ -94,13 +182,35 @@ console.log(obj?.propertyA?.propertyB)
 
 ## Function
 
+### Function.prototype.bind()
+> The bind() method creates a new function that, when called, has its this keyword set to the provided value, with a given sequence of arguments preceding any provided when the new function is called. 
+
+**NB:** .bind() method is not work in the arrow function, its `this` always represents the object in which the arrow function is defined. Arrow syntax automatically binds `this` to the surrounding code's context under the hood. It is not dependent on how they are invoked but it closes on the surrounding contenxt.  
+
+> Other parameters in bind method can implement the partial application in functional programming. Sometimes will be called currying. Check this out [JavaScript- Currying VS Partial Application.](https://towardsdatascience.com/javascript-currying-vs-partial-application-4db5b2442be8)
+```JavaScript
+const sum = (x, y) => x + y;
+const sumc = sum.bind(null, 1); // bind mehtod can't change the this object.
+sumc(2);    // => 3: x
+
+function func(x, y){
+    console.log(this);
+    return this.x + x + y;
+}
+const bound_func = func.bind({x: 3}, 2);    // {x: 3} as this object and x = 2, y is undefined.
+console.log(bound_func(3)); // => {x: 3}    8
+const bound2_func = bound_func.bind({x: 999}, 4);   // It doesn't work to rebinding the this object, and x can't either. The value 4 is passed to the y.
+console.log(bound2_func()); // => {x: 3}    9
+
+```
+
+
+
 ### Arrow Functions/Regular Functions
 
-> [Note This](https://betterprogramming.pub/difference-between-regular-functions-and-arrow-functions-f65639aba256)
-
-
+> [The difference between regular functions and arrow functions](https://betterprogramming.pub/difference-between-regular-functions-and-arrow-functions-f65639aba256)
 ### this binding
-> [The Complete Guide to this in JavaScript](https://www.freecodecamp.org/news/the-complete-guide-to-this-in-javascript/)  
+> [The Complete Guide to this in JavaScript](https://www.freecodecamp.org/news/the-complete-guide-to-this-in-javascript/)
 > ## **Rule 1**  
 > When a function is called in the global scope, the `this` reference is by default bound to the **global object**(`window` in the browser, or `global` in Node.js). For example
 > ```JavaScript
@@ -320,8 +430,6 @@ setTimeout(() => {
 
 ### Promise
 
-
-
 ### Async Function and await
 
 > **Description:**
@@ -371,50 +479,6 @@ asyncFunc()
     })
 
 ```
-
-
-
-### Example
-
-```javascript
-async function async1() {
-    console.log("async1 start");
-    await  async2();
-    console.log("async1 end");
-}
-async  function async2() {
-    console.log( 'async2');
-}
-console.log("script start");
-setTimeout(function () {
-    console.log("settimeout");
-},0);
-async1();
-new Promise(function (resolve) {
-    console.log("promise1");
-    resolve();
-}).then(function () {
-    console.log("promise2");
-});
-console.log('script end');
-
-/*
-Script Start
-async1 start
-async2
-promise1
-script end
-async1 end
-promise2
-settimeout
-*/
-```
-
-
-
-
-
-
 
 ## Web API
 
@@ -469,5 +533,3 @@ Create a MutationObserver for the DOM to watch the DOM's mutation. (i.e. the Api
     })
 </script>
 ```
-
-## 
