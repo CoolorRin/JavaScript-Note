@@ -1,11 +1,99 @@
+- [JavaScript Note](#javascript-note)
+  - [Functions](#functions)
+  - [Tips](#tips)
+    - [KeyWords: **`this`**@error](#keywords-thiserror)
+    - [Execute Order of asynchronous](#execute-order-of-asynchronous)
+    - [Property access error](#property-access-error)
+  - [Expressions](#expressions)
+    - [eval()](#eval)
+  - [ProtoTypeChain](#prototypechain)
+    - [Constructor Function](#constructor-function)
+    - [Inheritance](#inheritance)
+  - [Reference Object](#reference-object)
+  - [Destructuring assignment](#destructuring-assignment)
+    - [Spread syntax](#spread-syntax)
+  - [Asynchronous JavaScript](#asynchronous-javascript)
+    - [Promise](#promise)
+    - [Async Function and await](#async-function-and-await)
+  - [Web API](#web-api)
+    - [MutationObserver](#mutationobserver)
+
+
 # JavaScript Note
 This Project is **For check the weak point in the JavaScript learning way.** Include the library learning note for the typeScript, lodash and so on.  
 Also provide some syntax sugar or some problem solution for this Language.  
 **Keep it in mind And enjoy it.**
 
-## Expressions
+## Functions
 
-### 
+## Tips
+
+### KeyWords: **`this`**@error
+> [Tips](https://www.hhutzler.de/blog/javascript-tackling-this-object-and-nested-functions-by-samples/)  
+> A `this` behaves a little differently in JavaScript compared to other languages. It also has some differences between strict mode and non-strict mode.  
+> In most cases, the value of `this` is determined by how a function is called (runtime binding). It can be set by assignment during execution, and it may be different each time the function is called. The `bind()` method can `set the value of a function's this regardless of how it's called`, and `arrow function` don't provide their own `this` binding (it retains the `this` value of the enclosing lexical context).
+
+The `this`'s value is A property of an execution context (global, function or eval) that, in non-strict mode, is always a reference to an object and in strict mode can be any value.  
+
+
+### Execute Order of asynchronous
+
+```javascript
+async function async1() {
+    console.log("async1 start");
+    await  async2();
+    console.log("async1 end");
+}
+async  function async2() {
+    console.log( 'async2');
+}
+console.log("script start");
+setTimeout(function () {
+    console.log("settimeout");
+},0);
+async1();
+new Promise(function (resolve) {
+    console.log("promise1");
+    resolve();
+}).then(function () {
+    console.log("promise2");
+});
+console.log('script end');
+
+/*
+Script Start
+async1 start
+async2
+promise1
+script end
+async1 end
+promise2
+settimeout
+*/
+```
+
+### Property access error
+
+> Note: If access a Object have any undefined property it will return `undefined`. But access the property of **undefined** or **null**, it will return TypeError. To fix that:
+
+```javascript
+// Ugly Way
+const obj = Object.create(Object.prototype)
+if (obj) {
+    if (obj.propretyA) {
+        console.log(obj.propertyA.propertyB)
+    }
+}
+
+// Simple Way
+console.log(obj && obj.propertyA && obj.propertyA.propertyB)
+
+// ES2020
+console.log(obj?.propertyA?.propertyB)
+```
+
+
+## Expressions
 
 ### eval()
 > eval function is more like a javascript evaluates expression, it expected **A String representing a JavaScript expression, statement, or sequence of statements. The expression can include variables and properties of existing objects.** For safe and cause the unexpcted problem, use the **HTTP Content-Sercurity-Policy** to disable the eval().
@@ -26,34 +114,13 @@ console.log(x);                                  // prints 9
 "use strict";
 // var x = 2, y = 3;
 // NB: Strictness propagates into eval code evaluated by a
-//     direct call to eval â€” a call occurring through an
+//     direct call to eval â€? a call occurring through an
 //     expression of the form eval(...).
 console.log(eval("var x = 5; x")); // prints 5
 console.log(eval("var x = 7; x")); // prints 7
 console.log(eval("y"));            // prints 3
 console.log(x);                    // prints 2
 ``` 
-
-## Property access error
-
-> Note: If access a Object have any undefined property it will return `undefined`. But access the property of **undefined** or **null**, it will return TypeError. To fix that:
-
-```javascript
-// Ugly Way
-const obj = Object.create(Object.prototype)
-if (obj) {
-    if (obj.propretyA) {
-        console.log(obj.propertyA.propertyB)
-    }
-}
-
-// Simple Way
-console.log(obj && obj.propertyA && obj.propertyA.propertyB)
-
-// ES2020
-console.log(obj?.propertyA?.propertyB)
-```
-
 ## ProtoTypeChain
 
 > **Note: **Although the ES2015 have provide the `class` to make a `OOP` like Feature, but it just a syntactical sugar base on JavaScript **ProtoType Chain**.
@@ -373,49 +440,6 @@ asyncFunc()
 ```
 
 
-
-### Example
-
-```javascript
-async function async1() {
-    console.log("async1 start");
-    await  async2();
-    console.log("async1 end");
-}
-async  function async2() {
-    console.log( 'async2');
-}
-console.log("script start");
-setTimeout(function () {
-    console.log("settimeout");
-},0);
-async1();
-new Promise(function (resolve) {
-    console.log("promise1");
-    resolve();
-}).then(function () {
-    console.log("promise2");
-});
-console.log('script end');
-
-/*
-Script Start
-async1 start
-async2
-promise1
-script end
-async1 end
-promise2
-settimeout
-*/
-```
-
-
-
-
-
-
-
 ## Web API
 
 - File Download
@@ -469,5 +493,3 @@ Create a MutationObserver for the DOM to watch the DOM's mutation. (i.e. the Api
     })
 </script>
 ```
-
-## 
