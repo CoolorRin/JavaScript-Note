@@ -35,6 +35,86 @@ Also provide some syntax sugar or some problem solution for this Language.
 
 The `this`'s value is A property of an execution context (global, function or eval) that, in non-strict mode, is always a reference to an object and in strict mode can be any value.  
 
+#### Global Context
+> in the global context (outside of any function), `this` always refers to the global Object whether in strict mode or not.
+```javascript
+// Browser
+this === window   // => True
+
+// Node 
+this === global   // => True
+
+```
+**NB: Since ecmaScript2020, can use the `globalThis` property to get the global object, regardless of the current context in winch your code is running.**
+
+#### Function Context
+inside a function, the value of `this` depend on how the function is called.  
+Since the following code is not in **strict mode**, and because the value of `this` is not set by the call, `this` will default to the global object, which is `window` in a browser.
+
+```javascript
+function f1() {
+  return this;
+}
+//  Browser
+f1() === window;    // => true
+
+//  Node
+f1() === global;    // => true
+
+```
+In strict mode, if the value of `this` is not set when entering an execution context, it remains as `undefined`, as shown in the following example:
+```javascript
+function f2() {
+  'use strict';   // see strict mode
+  return this;
+}
+
+f2() === undefined;   // true
+```
+> **NB: Cause `f2` was called directly and not as a method or property of an object (e.g.  `window.f2()`). This feature wasn't implemented in some browsers when they first started to support `strict mode`. As a result, they incorrectly returned the `window` object.**  
+> To set the value of `this` to a particular value when calling a function, use `call()`, or `apply()`.
+
+#### Class context
+Within a class constructor, `this` is a regular object. All non-static methods within the class are added to the prototype of `this`:
+```javascript
+class Example {
+  constructor() {
+    const proto = Object.getPrototypeOf(this);
+    console.log(Object.getOwnPropertyNames(proto));
+  }
+  first(){}
+  static second(){} // static method is the property of the class itself.
+}
+
+new Example();  //  ['constructor', 'first']
+```
+
+#### Derived classed
+Unlike base class constructors, derived constructors have no initial `this` binding. Calling `super()` creates a `this` binding within the constructor and essentially has the effect of evaluating the following line fo code, there Base is the inherited class:
+```javascript
+class Base {
+	constructor() {
+		this.a = 1;
+		this.b = 2;
+	}
+	BaseMethod() {
+		console.log(this);
+	}
+}
+
+class derived extends Base {
+	constructor() {
+		super();
+		this.c = 1;
+	}
+}
+
+const test = new derived();
+test.BaseMethod();    // {a : 1, b : 2, c: 1}
+
+```
+
+
 
 ### Execute Order of asynchronous
 
